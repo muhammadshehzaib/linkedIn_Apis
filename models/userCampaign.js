@@ -1,0 +1,131 @@
+const mongoose = require("mongoose");
+const validator = require("validator");
+
+const schema = new mongoose.Schema({
+  campaignTitle: {
+    type: String,
+    required: true,
+    trim: true,
+    validate(value) {
+      if (validator.isEmpty(value)) {
+        throw new Error("campaign title is required");
+      }
+    },
+  },
+  typingDelay: {
+    type: Number,
+    required: true,
+    trim: true,
+    validate(value) {
+      if (value > 60000) {
+        throw new Error("Typing delay is should be less than 60000ms / 60s");
+      }
+    },
+  },
+  delayPageNavigate: {
+    type: Number,
+    required: true,
+    trim: true,
+    validate(value) {
+      if (value > 600000) {
+        throw new Error("Typing delay is should be less than 600000ms / 10m");
+      }
+    },
+  },
+  noOfProfileVisitsPerHour: {
+    type: Number,
+    required: true,
+    trim: true,
+    validate(value) {
+      if (value > 100) {
+        throw new Error(
+          "No of profile visits per hour should be less than 100"
+        );
+      }
+    },
+  },
+
+  noOfProfileVisitsPerDay: {
+    type: Number,
+    required: true,
+    trim: true,
+    validate(value) {
+      if (value > 1300) {
+        throw new Error(
+          "No of profile visits per hour should be less than 1300"
+        );
+      }
+    },
+  },
+
+  visitsBeforeDelay: {
+    type: Number,
+    required: true,
+    trim: true,
+    validate(value) {
+      if (value > 1000) {
+        throw new Error(
+          "No of profile visits before delay should be less than 1000"
+        );
+      }
+    },
+  },
+  visitDelay: {
+    type: Number,
+    required: true,
+    trim: true,
+    validate(value) {
+      if (value > 3600000) {
+        throw new Error(
+          "delay profile visits per hour should be less than 3600000ms / 1h"
+        );
+      }
+    },
+  },
+  limitSnoozeDays: {
+    type: Number,
+    required: true,
+    trim: true,
+    validate(value) {
+      if (value > 365) {
+        throw new Error(
+          "limit snooze days after reaching the limit is less than 365 days"
+        );
+      }
+    },
+  },
+  workingDaysArr: {
+    type: String,
+    required: true,
+    trim: true,
+    validate(value) {
+      if (validator.isEmpty(value)) {
+        throw new Error("workingDaysArr is required");
+      }
+    },
+  },
+  workHrsPerDay: {
+    type: Number,
+    required: true,
+    trim: true,
+    validate(value) {
+      if (value > 24) {
+        throw new Error("workHrsPerDay is required");
+      }
+    },
+  },
+  userId: {
+    type: String,
+    required: true,
+    trim: true,
+    unique: true,
+    validate(value) {
+      if (validator.isEmpty(value)) {
+        throw new Error("User Id is required");
+      }
+    },
+  },
+});
+const Campaign = mongoose.model("UserCampaign", schema);
+
+module.exports = Campaign;
