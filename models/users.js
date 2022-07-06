@@ -1,5 +1,7 @@
 const mongoose = require("mongoose");
 const validator = require("validator");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 const schema = new mongoose.Schema({
   firstName: {
     type: String,
@@ -41,28 +43,22 @@ const schema = new mongoose.Schema({
       }
     },
   },
-  userId: {
+  userName: {
     type: String,
     required: true,
     trim: true,
-    unique: true,
     validate(value) {
       if (validator.isEmpty(value)) {
         throw new Error("User cannot be empty");
       }
-      //  else if (!validator.equals(value)) {
-      //     throw new Error("UserId is not correct");
-      //   }
     },
   },
-  userPassword: {
+  password: {
     type: String,
     required: true,
     trim: true,
     validate(value) {
-      if (value.length < 6) {
-        throw new Error("Password must be at least 6 characters");
-      } else if (validator.isEmpty(value)) {
+      if (validator.isEmpty(value)) {
         throw new Error("userPassword cannot be empty");
       }
     },
@@ -73,7 +69,7 @@ const schema = new mongoose.Schema({
     trim: true,
     validate(value) {
       if (!validator.isEmail(value)) {
-        throw new Error("Email is invalid");
+        throw new Error("LinkedIn email is invalid");
       } else if (validator.isEmpty(value)) {
         throw new Error("Email cannot be empty");
       }
@@ -84,19 +80,63 @@ const schema = new mongoose.Schema({
     required: true,
     trim: true,
     validate(value) {
-      if (value.length < 6) {
-        throw new Error("Password must be at least 6 characters");
-      } else if (validator.isEmpty(value)) {
+      if (validator.isEmpty(value)) {
         throw new Error("LinkedIn password cannot be empty");
       }
     },
   },
-  linkedAuthCode: {
-    type: String,
-    // required: true,
-    trim: true,
-  },
+  tokens: [
+    {
+      token: {
+        type: String,
+        required: true,
+      },
+    },
+  ],
 });
+
+schema.methods.toJSON = function () {
+  const user = this;
+  const userObject = user.toObject();
+
+  delete userObject.password;
+  delete userObject.tokens;
+
+  return userObject;
+};
+
+schema.methods.generateAuthToken = async function () {
+  const user = this;
+  const token = jwt.sign({ _id: user._id.toString() }, "thisismynewcourse");
+
+  user.tokens = user.tokens.concat({ token });
+  await user.save();
+  return token;
+};
+
+schema.statics.findByCredentials = async (name, password) => {
+  const user = await User.findOne({ name });
+
+  if (!user) {
+    throw new Error("Unable to login");
+  }
+
+  const isMatch = await bcrypt.compare(password, user.password);
+
+  if (!isMatch) {
+    throw new Error("Unable to login");
+  }
+
+  return user;
+};
+schema.pre("save", async function (next) {
+  const user = this;
+  if (user.isModified("password")) {
+    user.password = await bcrypt.hash(user.password, 8);
+  }
+  next();
+});
+
 const User = mongoose.model("Users", schema);
 
 module.exports = User;
