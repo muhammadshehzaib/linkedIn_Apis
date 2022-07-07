@@ -1,17 +1,22 @@
 const express = require("express");
 const UserCampaign = require("../models/userCampaign");
 const app = express();
+const auth = require("../middleware/auth");
 
-app.post("/campaign", async (req, res) => {
-  const userCampaign = new UserCampaign(req.body);
+app.post("/campaign", auth, async (req, res) => {
+  const userId = new UserCampaign({
+    ...req.body,
+    userId: req.user._id,
+  });
+
   try {
-    await userCampaign.save();
-    res.status(201).send(userCampaign);
-  } catch (err) {
-    res.status(400).send(err);
+    await userId.save();
+    res.status(201).send(userId);
+  } catch (e) {
+    res.status(400).send(e);
   }
 });
-app.patch("/campaign/:id", async (req, res) => {
+app.patch("/campaign/:id", auth, async (req, res) => {
   const updates = Object.keys(req.body);
   const allowedUpdates = [
     "campaignTitle",
@@ -33,22 +38,28 @@ app.patch("/campaign/:id", async (req, res) => {
     return res.status(400).send({ error: "Invalid updates!" });
   }
   try {
-    const user = await UserCampaign.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true,
-    });
+    const user = await UserCampaign.findOne(
+      { _id: req.params.id, userId: req.user._id },
+      {}
+    );
 
     if (!user) {
       return res.status(404).send();
     }
+    updates.forEach((update) => (user[update] = req.body[update]));
+    await user.save();
     res.send(user);
   } catch (e) {
     res.status(400).send(e);
   }
 });
-app.delete("/campaign/:id", async (req, res) => {
+
+app.delete("/campaign/:id", auth, async (req, res) => {
   try {
-    const user = await UserCampaign.findByIdAndDelete(req.params.id);
+    const user = await UserCampaign.findByIdAndDelete({
+      _id: req.params.id,
+      userId: req.user._id,
+    });
 
     if (!user) {
       return res.status(404).send();
@@ -59,4 +70,5 @@ app.delete("/campaign/:id", async (req, res) => {
     res.status(500).send();
   }
 });
+
 module.exports = app;

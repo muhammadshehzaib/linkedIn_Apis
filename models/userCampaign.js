@@ -115,15 +115,9 @@ const schema = new mongoose.Schema({
     },
   },
   userId: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
     required: true,
-    trim: true,
-    unique: true,
-    validate(value) {
-      if (validator.isEmpty(value)) {
-        throw new Error("User Id cannot be empty");
-      }
-    },
+    ref: "Users",
   },
 });
 const Campaign = mongoose.model("UserCampaign", schema);

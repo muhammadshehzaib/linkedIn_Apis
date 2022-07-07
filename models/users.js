@@ -95,19 +95,23 @@ const schema = new mongoose.Schema({
   ],
 });
 
+schema.virtual("userId", {
+  ref: "Users",
+  localField: "_id",
+  foreignField: "userId",
+});
+
 schema.methods.toJSON = function () {
   const user = this;
   const userObject = user.toObject();
-
   delete userObject.password;
   delete userObject.tokens;
-
   return userObject;
 };
 
 schema.methods.generateAuthToken = async function () {
   const user = this;
-  const token = jwt.sign({ _id: user._id.toString() }, "thisismynewcourse");
+  const token = jwt.sign({ _id: user._id.toString() }, "shehzaib");
 
   user.tokens = user.tokens.concat({ token });
   await user.save();
