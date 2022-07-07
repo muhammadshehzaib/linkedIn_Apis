@@ -13,5 +13,11 @@ app.use(campaigns);
 app.listen(PORT, () => {
   console.log("Server is up and running on port " + PORT);
 });
+const UserCampaign = require("./models/userCampaign");
+const main = async () => {
+  // find user by the usercampaign
+  const usercampaign = await UserCampaign.findById("62c689c1d87cc817f15cbf39");
+  await usercampaign.populate("userId");
+};
 
-// test cases and verify it in documents
+main();
