@@ -7,11 +7,21 @@ const schema = new mongoose.Schema({
     type: String,
     required: true,
     trim: true,
+    validate(value) {
+      if (validator.isEmpty(value)) {
+        throw new Error("Profile Url cannot be empty");
+      }
+    },
   },
   firstName: {
     type: String,
     required: true,
     trim: true,
+    validate(value) {
+      if (validator.isEmpty(value)) {
+        throw new Error("First name cannot be empty");
+      }
+    },
   },
   middleName: {
     type: String,
