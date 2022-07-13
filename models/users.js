@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const validator = require("validator");
+const { Schema, Types } = mongoose;
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const schema = new mongoose.Schema({
@@ -93,12 +94,10 @@ const schema = new mongoose.Schema({
       },
     },
   ],
-});
-
-schema.virtual("userId", {
-  ref: "Users",
-  localField: "_id",
-  foreignField: "userId",
+  userId: {
+    type: Types.ObjectId,
+    ref: "Users",
+  },
 });
 
 schema.methods.toJSON = function () {

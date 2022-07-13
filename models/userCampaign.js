@@ -1,5 +1,7 @@
 const mongoose = require("mongoose");
 const validator = require("validator");
+const Leads = require("./lead");
+const { Schema, Types } = mongoose;
 
 const schema = new mongoose.Schema({
   campaignTitle: {
@@ -114,12 +116,12 @@ const schema = new mongoose.Schema({
       }
     },
   },
-  userId: {
-    type: mongoose.Schema.Types.ObjectId,
-    required: true,
-    ref: "Users",
+  userCampaignId: {
+    type: Types.ObjectId,
+    ref: "UserCampaign",
   },
 });
+
 const Campaign = mongoose.model("UserCampaign", schema);
 
 module.exports = Campaign;
