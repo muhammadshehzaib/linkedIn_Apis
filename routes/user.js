@@ -1,8 +1,9 @@
 const express = require("express");
 const User = require("../models/users");
+const auth = require("../middleware/auth");
 const app = express();
 
-app.post("/user", async function (req, res) {
+app.post("/user", async (req, res) => {
   const user = new User(req.body);
   try {
     await user.save();
@@ -11,6 +12,41 @@ app.post("/user", async function (req, res) {
     res.status(400).send(err);
   }
 });
+app.post("/user/login", async (req, res) => {
+  try {
+    const user = await User.findByCredentials(
+      req.body.userName,
+      req.body.password
+    );
+    const token = await user.generateAuthToken();
+    res.send({ user, token });
+  } catch (e) {
+    res.status(400).send();
+  }
+});
+
+app.post("/user/logout", auth, async (req, res) => {
+  try {
+    req.user.tokens = req.user.tokens.filter((token) => {
+      return token.token !== req.token;
+    });
+    await req.user.save();
+    res.send();
+  } catch (e) {
+    res.status(500).send();
+  }
+});
+
+app.post("/users/logoutAll", auth, async (req, res) => {
+  try {
+    req.user.tokens = [];
+    await req.user.save();
+    res.send();
+  } catch (e) {
+    res.status(500).send();
+  }
+});
+
 app.patch("/user/:id", async (req, res) => {
   const updates = Object.keys(req.body);
   const allowedUpdates = [
@@ -18,7 +54,7 @@ app.patch("/user/:id", async (req, res) => {
     "middleName",
     "lastName",
     "title",
-    "userId",
+    "userName",
     "userPassword",
     "linkedInEmail",
     "linkedInPassword",

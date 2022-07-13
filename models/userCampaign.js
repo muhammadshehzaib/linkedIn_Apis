@@ -8,7 +8,7 @@ const schema = new mongoose.Schema({
     trim: true,
     validate(value) {
       if (validator.isEmpty(value)) {
-        throw new Error("campaign title is required");
+        throw new Error("campaign title cannot be");
       }
     },
   },
@@ -100,7 +100,7 @@ const schema = new mongoose.Schema({
     trim: true,
     validate(value) {
       if (validator.isEmpty(value)) {
-        throw new Error("workingDaysArr is required");
+        throw new Error("working days cannot be empty");
       }
     },
   },
@@ -110,20 +110,14 @@ const schema = new mongoose.Schema({
     trim: true,
     validate(value) {
       if (value > 24) {
-        throw new Error("workHrsPerDay is required");
+        throw new Error("work hrs per day should be less than 24");
       }
     },
   },
   userId: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
     required: true,
-    trim: true,
-    unique: true,
-    validate(value) {
-      if (validator.isEmpty(value)) {
-        throw new Error("User Id is required");
-      }
-    },
+    ref: "Users",
   },
 });
 const Campaign = mongoose.model("UserCampaign", schema);
